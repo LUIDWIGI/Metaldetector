@@ -17,7 +17,13 @@ detector::~detector() {
 }
 
 u16 detector::readSensor() {
-  this->sensorValue = analogRead(this->sensorPin);
+  u32 sensorValues = 0;
+
+  for (uint_fast8_t i = 0; i < 5; i++) {
+    sensorValues += analogRead(this->sensorPin);
+  }
+  this->sensorValue = sensorValues / 5;
+
   return this->sensorValue;
 }
 
