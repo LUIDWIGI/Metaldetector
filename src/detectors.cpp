@@ -86,51 +86,55 @@ void detectors::lengthCheck() {
 
 void detectors::widthCheck() {
   // Data for the width detector
-  static bool width_detected = false;
-  static u16 maxWidth = 0;
-  static u16 currWidth = 0;
 
   if (amount < 3) {
     printf("Not enough detectors to check width");
   }
-  // Algorithm for 3 sensors
-  else if (amount == 3) {
-    if (detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1]) {
-      currWidth = detectorsData[2] - detectorsData[1];
-      if (currWidth < maxWidth) {
-        maxWidth = currWidth;
-        width = map(maxWidth, 0, 2 ^ measurementResolution,
-                    0, detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
-      }
-    }
-    //Algorithm for 4 sensors
-  } else {
-    // Check if the object is under the middle sensor and triggers the right sensor
-    if (detectorsData[2] == (2^measurementResolution) && detectorsData[1] >= detectorThresholds[1]) {
-      currWidth = 2^measurementResolution - detectorsData[1];
-      if (currWidth < maxWidth) {
-        maxWidth = currWidth;
-        width = map(maxWidth, 0, 2 ^ measurementResolution,
-                    0, detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
-      }
-      // Check if the object is under the middle sensor and triggers the left sensor
-    } else if (detectorsData[2] == (2^measurementResolution) && detectorsData[3] >= detectorThresholds[3]) {
-      currWidth = 2^measurementResolution - detectorsData[3];
-      if (currWidth < maxWidth) {
-        maxWidth = currWidth;
-        width = map(maxWidth, 0, 2 ^ measurementResolution,
-                    0, detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
-      }
-      // Check if the object is under the left sensor and triggers the right sensor
-    } else if (detectorsData[1] >= (2^measurementResolution) && detectorsData[3] >= detectorThresholds[3]) {
-      currWidth = detectorsData[1] - detectorsData[3];
-      if (currWidth < maxWidth) {
-        maxWidth = currWidth;
-        width = map(maxWidth, 0, 2 ^ measurementResolution,
-                    0, 2*detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
-      }
-    }
+  if (detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1]) {
+    width = detectorsHorizontalSeparation;
   }
+  else if ((detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1]) &&
+    (detectorsData[2] >= detectorThresholds[2] && detectorsData[3] >= detectorThresholds[3])) {
+    width = detectorsHorizontalSeparation * 2;
+  }
+  // // Algorithm for 3 sensors
+  // else if (amount == 3) {
+  //   if (detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1]) {
+  //     currWidth = detectorsData[2] - detectorsData[1];
+  //     if (currWidth < maxWidth) {
+  //       maxWidth = currWidth;
+  //       width = map(maxWidth, 0, 2 ^ measurementResolution,
+  //                   0, detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
+  //     }
+  //   }
+  //   //Algorithm for 4 sensors
+  // } else {
+  //   // Check if the object is under the middle sensor and triggers the right sensor
+  //   if (detectorsData[2] == (2^measurementResolution) && detectorsData[1] >= detectorThresholds[1]) {
+  //     currWidth = 2^measurementResolution - detectorsData[1];
+  //     if (currWidth < maxWidth) {
+  //       maxWidth = currWidth;
+  //       width = map(maxWidth, 0, 2 ^ measurementResolution,
+  //                   0, detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
+  //     }
+  //     // Check if the object is under the middle sensor and triggers the left sensor
+  //   } else if (detectorsData[2] == (2^measurementResolution) && detectorsData[3] >= detectorThresholds[3]) {
+  //     currWidth = 2^measurementResolution - detectorsData[3];
+  //     if (currWidth < maxWidth) {
+  //       maxWidth = currWidth;
+  //       width = map(maxWidth, 0, 2 ^ measurementResolution,
+  //                   0, detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
+  //     }
+  //     // Check if the object is under the left sensor and triggers the right sensor
+  //   } else if (detectorsData[1] >= (2^measurementResolution) && detectorsData[3] >= detectorThresholds[3]) {
+  //     currWidth = detectorsData[1] - detectorsData[3];
+  //     if (currWidth < maxWidth) {
+  //       maxWidth = currWidth;
+  //       width = map(maxWidth, 0, 2 ^ measurementResolution,
+  //                   0, 2*detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
+  //     }
+  //  }
+  //}
 }
 
 u16 detectors::getLength() {
