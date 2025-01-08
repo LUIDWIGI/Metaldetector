@@ -12,8 +12,8 @@ class detector {
   // Fields
   private:
     u16 sensorPin;
-    u16 sensorValue;
-    float sensorVoltage;
+    u16 sensorValue{};
+    float sensorVoltage{};
     float maxSensorVoltage;
     u8 sensorResolution;
 

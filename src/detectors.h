@@ -47,8 +47,8 @@ class detectors {
      * @param detectorsVerticalSeparation The vertical separation between the detectors. (Default: 100)
      * @param detectorsHorizontalSeparation The horizontal separation between the detectors. (Default: 100)
      */
-    detectors(u8 amount, u8 measurementResolution = 10, float maxVoltage = 5.0, u16* detectorThresholds = nullptr,
-              u16 detectorsVerticalSeparation = 100, u16 detectorsHorizontalSeparation = 100);
+    detectors(u8 amount, u16* detectorThresholds = nullptr, u16 detectorsVerticalSeparation = 100,
+              u16 detectorsHorizontalSeparation = 100, u8 measurementResolution = 10, float maxVoltage = 5.0);
 
     /**
       * @brief Destructor for the detectors class.

@@ -4,8 +4,8 @@
 
 #include "detectors.h"
 
-detectors::detectors(u8 amount, u8 measurementResolution, float maxVoltage, u16* detectorThresholds
-                     , u16 detectorsVerticalSeparation, u16 detectorsHorizontalSeparation) {
+detectors::detectors(u8 amount, u16* detectorThresholds,u16 detectorsVerticalSeparation,
+              u16 detectorsHorizontalSeparation, u8 measurementResolution, float maxVoltage) {
   // Initialize the fields.
   this->amount = amount ? amount > 4 : amount;  // Limit amount to 4 detectors
   this->measurementResolution = measurementResolution;
