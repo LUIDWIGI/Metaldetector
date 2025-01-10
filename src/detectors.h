@@ -67,8 +67,12 @@ class detectors {
      * @brief Read the sensors connected to the arduino.
      *
      * @note Run this inside of a loop in the main function.
+     *
+     * @return True if the sensors were read successfully.
      */
-    void readSensors();
+    bool readSensors();
+
+    void reset();
 
   private:
     /**

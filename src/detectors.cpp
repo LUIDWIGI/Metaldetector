@@ -32,7 +32,7 @@ detectors::~detectors() {
     delete[] detectors_p;
 }
 
-void detectors::readSensors() {
+bool detectors::readSensors() {
   // Read the sensor values into data array.
   for (u8 i = 0; i < amount; i++) {
     detectorsData[i] = detectors_p[i]->readSensor();
@@ -40,7 +40,18 @@ void detectors::readSensors() {
   speedCheck();
   if (speed != 0) {
     lengthCheck();
+    widthCheck();
   }
+  if (length != 0) {
+    return true;
+  }
+  return false;
+}
+
+void detectors::reset() {
+  length = 0;
+  speed = 0;
+  width = 0;
 }
 
 void detectors::speedCheck() {

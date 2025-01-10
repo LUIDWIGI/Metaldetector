@@ -37,6 +37,9 @@ void loop() {
       switch (Serial.read()) {
         case 's':
           enabled = !enabled;
+          if (enabled) {
+            Detectors->reset();
+          }
           break;
         default:
           break;
@@ -47,13 +50,17 @@ void loop() {
   if (enabled) {
     // Update measurements based on update rate
     if (millis() - lastUpdate >= UPDATE_RATE) {
-      Detectors->readSensors();
-      speed = Detectors->getSpeed();
-      length = Detectors->getLength();
-      width = Detectors->getWidth();
+      if (Detectors->readSensors()) {
+        speed = Detectors->getSpeed();
+        length = Detectors->getLength();
+        width = Detectors->getWidth();
+        enabled = false;
+        Serial.println("?d");
+      }
       lastUpdate = millis();
     }
 
+    // TODO: Move these sends to update
     // Send data based on send rate
     if (millis() - lastSend >= SEND_RATE) {
       // Print serial data
