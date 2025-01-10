@@ -43,7 +43,7 @@ class detectors {
      * @param amount The amount of detectors.
      * @param measurementResolution The resolution of the measurements. (Default: 10)
      * @param maxVoltage The maximum voltage that can be read by the arduino. (Default: 5.0)
-     * @param detectorThresholds The thresholds for the detectors. (Default: nullptr)
+     * @param detectorThresholds The thresholds for the detectors. (Default: nullptr) (DON'T LEAVE THIS AS NULL)
      * @param detectorsVerticalSeparation The vertical separation between the detectors. (Default: 100)
      * @param detectorsHorizontalSeparation The horizontal separation between the detectors. (Default: 100)
      */

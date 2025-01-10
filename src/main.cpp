@@ -1,11 +1,12 @@
 #include <Arduino.h>
 #include <detectors.h>
 
-#include "detector.h"
-
-#define DETECTORS_AMOUNT 1  // Amount of detectors
+u8 detectorsAmount = 0;  // Amount of detectors
 #define UPDATE_RATE 10  // Update rate in ms
 #define SEND_RATE 1000  // Send rate in ms
+
+#define HORIZONTAL_SEPARATION 170  // Horizontal separation between detectors in mm
+#define VERTICAL_SEPARATION 235  // Vertical separation between detectors in mm
 
 u32 lastUpdate = 0; // Last time sensors updated
 u32 lastSend = 0; // Last time data sent
@@ -20,7 +21,13 @@ bool enabled = false; // Flag to enable/disable the system
 detectors* Detectors;
 void setup() {
   Serial.begin(9600);
-  Detectors = new detectors(DETECTORS_AMOUNT, thresholds);
+  while (Serial.available() == 0) {}
+  if (Serial.read() == '!') {
+    if (Serial.read() == 'a') {
+      detectorsAmount = Serial.read();
+    }
+  }
+  Detectors = new detectors(detectorsAmount, thresholds, VERTICAL_SEPARATION, HORIZONTAL_SEPARATION);
 }
 
 void loop() {
@@ -28,7 +35,9 @@ void loop() {
   if (Serial.available() > 0) {
     if (Serial.read() == '!') {
       switch (Serial.read()) {
-
+        case 's':
+          enabled = !enabled;
+          break;
         default:
           break;
       }
@@ -49,13 +58,19 @@ void loop() {
     if (millis() - lastSend >= SEND_RATE) {
       // Print serial data
       if (lastSpeed != speed) {
-
+        lastSpeed = speed;
+        Serial.print("?s");
+        Serial.println(speed);
       }
       if (lastLength != length) {
-
+        lastLength = length;
+        Serial.print("?l");
+        Serial.println(length);
       }
       if (lastWidth != width) {
-
+        lastWidth = width;
+        Serial.print("?w");
+        Serial.println(width);
       }
     }
   }
