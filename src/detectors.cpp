@@ -40,7 +40,7 @@ bool detectors::readSensors() {
   speedCheck();
   if (speed != 0) {
     lengthCheck();
-    widthCheck();
+    //widthCheck();
   }
   if (length != 0) {
     return true;
@@ -56,19 +56,18 @@ void detectors::reset() {
 
 void detectors::speedCheck() {
   // Data for the speed detector
-  static bool speed_detected = false;
-  static u32 speed_timeDetected = 0;
+
 
   // Check if speed detection is active
   if (speed_detected) {
     // If active, check if object is under the lower detector
-    if (detectorsData[2] >= detectorThresholds[2]) {
+    if (detectorsData[2] >= detectorThresholds[2] + 100) {
       speed_detected = false;
       speed = detectorsHorizontalSeparation / (millis() - speed_timeDetected); // V = s / t
     }
   }
   // If active, check if object is under the speed detector
-  else if (detectorsData[0] >= detectorThresholds[0]) {
+  else if (detectorsData[0] >= detectorThresholds[0] + 100) {
     speed_detected = true;
     speed_timeDetected = millis();  // Store time of detection
   }
@@ -77,8 +76,6 @@ void detectors::speedCheck() {
 
 void detectors::lengthCheck() {
   // Data for the length detector
-  static bool length_detected = false;
-  static u32 length_timeDetected = 0;
 
   // Check if the object is under the length detector
   if (length_detected) {
@@ -87,9 +84,10 @@ void detectors::lengthCheck() {
       length_detected = false;
       length = speed * (millis() - length_timeDetected);  // s = V * t
     }
+    widthCheck();
   }
   // Check if object is under the length detector
-  else if (detectorsData[2] >= detectorThresholds[2]) {
+  else if (detectorsData[2] >= detectorThresholds[2] + 100) {
     length_detected = true;
     length_timeDetected = millis(); // Store time of detection
   }
@@ -97,16 +95,21 @@ void detectors::lengthCheck() {
 
 void detectors::widthCheck() {
   // Data for the width detector
+  uint16_t currWidth = 0;
 
   if (amount < 3) {
     printf("Not enough detectors to check width");
   }
   if (detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1]) {
-    width = detectorsHorizontalSeparation;
+    currWidth = detectorsHorizontalSeparation;
   }
   else if ((detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1]) &&
     (detectorsData[2] >= detectorThresholds[2] && detectorsData[3] >= detectorThresholds[3])) {
-    width = detectorsHorizontalSeparation * 2;
+    currWidth = detectorsHorizontalSeparation * 2;
+  }
+
+  if (currWidth > width) {
+    width = currWidth;
   }
   // // Algorithm for 3 sensors
   // else if (amount == 3) {

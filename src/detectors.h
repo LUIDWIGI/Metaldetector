@@ -28,9 +28,13 @@ class detectors {
 
     // Length fields
     u16 length = 0; // Length in mm
+    bool length_detected = false;
+    u32 length_timeDetected = 0;
 
     // Speed fields
     u16 speed = 0; // Speed in mm/s
+    bool speed_detected = false;
+    u32 speed_timeDetected = 0;
 
     // Width fields
     u16 width = 0; // Width in mm
