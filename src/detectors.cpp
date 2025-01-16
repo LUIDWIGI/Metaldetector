@@ -44,14 +44,16 @@ bool detectors::readSensors() {
     //Serial.println("remmen");
   }
   //Serial.println("test");
-  speedCheck();
+
   if (speed != 0) {
     //Serial.println("balletjes");
     lengthCheck();
     //widthCheck();
-  }
-  if (length != 0) {
-    return true;
+    if (length != 0) {
+      return true;
+    }
+  } else {
+    speedCheck();
   }
   return false;
 }
