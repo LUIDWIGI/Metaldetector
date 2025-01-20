@@ -75,7 +75,7 @@ void detectors::speedCheck() {
     // If active, check if object is under the lower detector
     if (detectorsData[2] >= detectorThresholds[2] + 100) {
       speed_detected = false;
-      speed = (detectorsVerticalSeparation * 10) / (millis() - speed_timeDetected); // V = s / t
+      speed = (detectorsVerticalSeparation * 10) / (millis() - speed_timeDetected); // V = s / △t
       speed_timeDetected = 0;
     }
   }
@@ -99,7 +99,7 @@ void detectors::lengthCheck() {
     if (detectorsData[2] < detectorThresholds[2]) {
       Serial.println("length");
       length_detected = false;
-      length = speed * (millis() - length_timeDetected);  // s = V * t
+      length = speed * (millis() - length_timeDetected);  // s = V * △t
       length_timeDetected = 0;
     }
     widthCheck();
