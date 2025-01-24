@@ -1,53 +1,41 @@
 #include <Arduino.h>
 #include <detectors.h>
 
-u8 detectorsAmount = 3;  // Amount of detectors
-#define UPDATE_RATE 100  // Update rate in ms
+u8 detectorsAmount = 4;  // Amount of detectors
+#define UPDATE_RATE 5  // Update rate in ms
 
 #define HORIZONTAL_SEPARATION 170  // Horizontal separation between detectors in mm
-#define VERTICAL_SEPARATION 235  // Vertical separation between detectors in mm
+#define VERTICAL_SEPARATION 375  // Vertical separation between detectors in mm
 
 u32 lastUpdate = 0; // Last time sensors updated
-u32 lastSend = 0; // Last time data sent
 
 bool started = false;
 
 u16 speed, length, width; // Variables for the speed, length and width of the object
 
-u16 thresholds[3] = {260, 0, 150}; // Detectors thresholds
+u16 thresholds[4] = {300, 400, 100, 400}; // Detectors thresholds
 
 bool enabled = false; // Flag to enable/disable the system
 
 detectors* Detectors;
 void setup() {
+  // Enable serial communication and initialize the detectors
   Serial.begin(9600);
+  Detectors = new detectors(detectorsAmount, thresholds, VERTICAL_SEPARATION, HORIZONTAL_SEPARATION);
 }
 
 void loop() {
-  //Serial.println(Serial.readString());
-  //Serial.println(detectorsAmount);
-  //Serial.println("loop");
-  // Read serial commands
-  if (Serial.available() > 0) {
-    //Serial.println("Avaib");
-    if (Serial.read() == '!') {
 
-      //Serial.println("command");
-      //Serial.println(Serial.read());
-      switch (Serial.read()) {
-        case 'a':
-          if (started == false) {
-            detectorsAmount = Serial.read();
-            Detectors = new detectors(detectorsAmount, thresholds, VERTICAL_SEPARATION, HORIZONTAL_SEPARATION);
-            started = true;
-          }
-        break;
+  // Read serial commands
+  if (Serial.available() > 2) {
+    char check = Serial.read();
+    if (check == '!') { // Check if the command is valid
+      char cmd = Serial.read();
+      switch (cmd) { // Check the command
         case 's':
-          //Serial.println("startcmd");
           if (Serial.read() == '1') {
             enabled = true;
             Detectors->reset();
-            Serial.println("Start");
           } else if (Serial.read() == '0') {
             enabled = false;
           }
@@ -57,12 +45,11 @@ void loop() {
       }
     }
   }
-
+  // Check if the sensors should be enabled
   if (enabled) {
-    //Serial.println("test");
     // Update measurements based on update rate
     if (millis() - lastUpdate >= UPDATE_RATE) {
-      //Serial.println("test");
+      // Check if there are new measurements to be sent
       if (Detectors->readSensors()) {
         speed = Detectors->getSpeed();
         length = Detectors->getLength();

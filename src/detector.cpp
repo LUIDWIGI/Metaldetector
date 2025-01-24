@@ -10,7 +10,6 @@ detector::detector(u16 sensorPin, u8 sensorResolution, float maxSensorVoltage) {
   this->maxSensorVoltage = maxSensorVoltage;
   pinMode(sensorPin, INPUT);
   analogReference(DEFAULT);
-  //Serial.println(this->sensorPin);
 }
 
 detector::~detector() {

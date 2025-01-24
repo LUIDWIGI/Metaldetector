@@ -23,18 +23,18 @@ class detectors {
     // Detectors fields
     detector** detectors_p;
     u16* detectorsData;
-    u16 detectorsVerticalSeparation = 0; // Vertical distance between the detectors in mm
-    u16 detectorsHorizontalSeparation = 0;  // Horizontal distance between the detectors in mm
+    u32 detectorsVerticalSeparation = 0; // Vertical distance between the detectors in mm
+    u32 detectorsHorizontalSeparation = 0;  // Horizontal distance between the detectors in mm
 
     // Length fields
     u16 length = 0; // Length in mm
-    bool length_detected = false;
-    u32 length_timeDetected = 0;
+    bool length_detected = false; // Flag to check if the length detection has been started
+    u32 length_timeDetected = 0; // Time at which the length detection started
 
     // Speed fields
     u16 speed = 0; // Speed in mm/s
-    bool speed_detected = false;
-    u32 speed_timeDetected = 0;
+    bool speed_detected = false; // Flag to check if the speed detection has been started
+    u32 speed_timeDetected = 0; // Time at which the speed detection started
 
     // Width fields
     u16 width = 0; // Width in mm
@@ -61,11 +61,28 @@ class detectors {
 
     //Getters
 
+    /**
+     * @brief Get the length of the object.
+     *
+     * @return The length of the object in mm.
+     */
     u16 getLength();
 
+    /**
+     * @brief Get the speed of the object.
+     *
+     * @return The speed of the object in mm/s.
+     */
     u16 getSpeed();
 
+    /**
+     * @brief Get the width of the object.
+     *
+     * @return The width of the object in mm.
+     */
     u16 getWidth();
+
+    // Other functions
 
     /**
      * @brief Read the sensors connected to the arduino.
@@ -76,9 +93,14 @@ class detectors {
      */
     bool readSensors();
 
+    /**
+     * @brief Reset the length, speed and width of the object.
+     */
     void reset();
 
   private:
+    // Check functions
+
     /**
      * @brief Check speed of the belt.
      * @note This method may take more than 1 loop to detect the speed.
@@ -91,8 +113,11 @@ class detectors {
      */
     void lengthCheck();
 
+    /**
+     * @brief Check the width of the object.
+     * @note This method may take more than 1 loop to detect the width.
+     */
     void widthCheck();
 };
-
 
 #endif //METALDETECTOR_DETECTORS_H

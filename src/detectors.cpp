@@ -11,7 +11,7 @@ detectors::detectors(u8 amount, u16* detectorThresholds,u16 detectorsVerticalSep
   this->measurementResolution = measurementResolution;
   this->maxVoltage = maxVoltage;
   this->detectorThresholds = detectorThresholds;
-  this->detectorsVerticalSeparation = detectorsVerticalSeparation;
+  this->detectorsVerticalSeparation = static_cast<u32>(detectorsVerticalSeparation) * 1000;
   this->detectorsHorizontalSeparation = detectorsHorizontalSeparation;
 
   detectorsData = new u16[amount]; // Create an array to store the sensor values.
@@ -20,7 +20,6 @@ detectors::detectors(u8 amount, u16* detectorThresholds,u16 detectorsVerticalSep
   // Create detector objects and store them in the array.
   for (u8 i = 0; i < amount; i++) {
     detectors_p[i] = new detector(A0 + i, measurementResolution, maxVoltage);
-    //Serial.println(detectors_p[i]->readSensor());
   }
 }
 
@@ -34,31 +33,28 @@ detectors::~detectors() {
 }
 
 bool detectors::readSensors() {
-  //Serial.println(amount);
   // Read the sensor values into data array.
   for (u8 i = 0; i < amount; i++) {
     detectorsData[i] = detectors_p[i]->readSensor();
-    //Serial.print(i);
-    //Serial.print(" ");
-    //Serial.println(detectorsData[i]);
-    //Serial.println("remmen");
   }
-  //Serial.println("test");
 
+  // Check if there is a speed value
   if (speed != 0) {
-    //Serial.println("balletjes");
     lengthCheck();
-    //widthCheck();
     if (length != 0) {
+      // If there are length and speed values, return true
       return true;
     }
+    // Otherwise measure speed
   } else {
     speedCheck();
   }
+    // If there are no length and speed values, return false
   return false;
 }
 
 void detectors::reset() {
+  // Reset the length, speed and width values
   length = 0;
   speed = 0;
   width = 0;
@@ -71,103 +67,75 @@ void detectors::reset() {
 void detectors::speedCheck() {
   // Check if speed detection is active
   if (speed_detected) {
-    //Serial.println("yes");
-    // If active, check if object is under the lower detector
+    // If active, check if object is under the back detector
     if (detectorsData[2] >= detectorThresholds[2] + 100) {
-      speed_detected = false;
-      speed = (detectorsVerticalSeparation * 10) / (millis() - speed_timeDetected); // V = s / △t
+      speed_detected = false; // Flag speed detection as not started
+      speed = detectorsVerticalSeparation / (millis() - speed_timeDetected); // V = s / △t
       speed_timeDetected = 0;
     }
   }
-  // If active, check if object is under the speed detector
+  // If not active, check if object is under the front speed detector
   else if (detectorsData[0] >= detectorThresholds[0] + 100) {
-    //Serial.println("yo");
-    speed_detected = true;
+    speed_detected = true;  // Flag speed detection started
     speed_timeDetected = millis();  // Store time of detection
-    //Serial.println("yes");
   }
 
 }
 
 void detectors::lengthCheck() {
-  // Data for the length detector
-
-  // Check if the object is under the length detector
+  // Check if the object has been under the length detector
   if (length_detected) {
-    //Serial.println("yes");
-    // If active, check if object is not under the length detector
+    // If active, check if object is no longer under the length detector
     if (detectorsData[2] < detectorThresholds[2]) {
-      Serial.println("length");
-      length_detected = false;
-      length = speed * (millis() - length_timeDetected);  // s = V * △t
+      length_detected = false; // Flag length detection as not started
+      length = (speed * ((millis() - length_timeDetected)/100)) / 10;  // s = V * △t
       length_timeDetected = 0;
     }
+    // When the length detection is active, also check the width
     widthCheck();
   }
-  // Check if object is under the length detector
+  // If not active, check if object is under the length detector
   else if (detectorsData[2] >= detectorThresholds[2] + 100) {
-    Serial.println("yes");
-    length_detected = true;
+    length_detected = true; // Flag length detection started
     length_timeDetected = millis(); // Store time of detection
   }
 }
 
 void detectors::widthCheck() {
   // Data for the width detector
-  u16 currWidth = 0;
+  u16 currWidth = 0; // Current width of the object
 
+  // Throw error for not enough detectors for width
   if (amount < 3) {
     printf("Not enough detectors to check width");
   }
-  if (detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1]) {
-    currWidth = detectorsHorizontalSeparation;
+  // Algorithm for 3 sensors
+  else if (amount == 3) {
+    // Check if the object is under the length sensor and the width sensor
+    if (detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1]) {
+      currWidth = detectorsHorizontalSeparation;
+    }
   }
-  else if ((detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1]) &&
-    (detectorsData[2] >= detectorThresholds[2] && detectorsData[3] >= detectorThresholds[3])) {
-    currWidth = detectorsHorizontalSeparation * 2;
+  // Algorithm for 4 sensors
+  else {
+    // Check if the object is under the length sensor and both width sensor
+    if (detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1] && detectorsData[3] >= detectorThresholds[3]) {
+      currWidth = detectorsHorizontalSeparation * 2;
+    }
+    // Check if the object is under the length sensor and the first width sensor
+    else if (detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1]) {
+      currWidth = detectorsHorizontalSeparation;
+    }
+    // Check if the object is under the length sensor and the second width sensor
+    else if (detectorsData[2] >= detectorThresholds[2] && detectorsData[3] >= detectorThresholds[3]) {
+      currWidth = detectorsHorizontalSeparation;
+    }
   }
 
+  // Check if the current width is larger than the maximum width
   if (currWidth > width) {
-    width = currWidth;
+    width = currWidth; // Make current width maximum width
   }
-  // // Algorithm for 3 sensors
-  // else if (amount == 3) {
-  //   if (detectorsData[2] >= detectorThresholds[2] && detectorsData[1] >= detectorThresholds[1]) {
-  //     currWidth = detectorsData[2] - detectorsData[1];
-  //     if (currWidth < maxWidth) {
-  //       maxWidth = currWidth;
-  //       width = map(maxWidth, 0, 2 ^ measurementResolution,
-  //                   0, detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
-  //     }
-  //   }
-  //   //Algorithm for 4 sensors
-  // } else {
-  //   // Check if the object is under the middle sensor and triggers the right sensor
-  //   if (detectorsData[2] == (2^measurementResolution) && detectorsData[1] >= detectorThresholds[1]) {
-  //     currWidth = 2^measurementResolution - detectorsData[1];
-  //     if (currWidth < maxWidth) {
-  //       maxWidth = currWidth;
-  //       width = map(maxWidth, 0, 2 ^ measurementResolution,
-  //                   0, detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
-  //     }
-  //     // Check if the object is under the middle sensor and triggers the left sensor
-  //   } else if (detectorsData[2] == (2^measurementResolution) && detectorsData[3] >= detectorThresholds[3]) {
-  //     currWidth = 2^measurementResolution - detectorsData[3];
-  //     if (currWidth < maxWidth) {
-  //       maxWidth = currWidth;
-  //       width = map(maxWidth, 0, 2 ^ measurementResolution,
-  //                   0, detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
-  //     }
-  //     // Check if the object is under the left sensor and triggers the right sensor
-  //   } else if (detectorsData[1] >= (2^measurementResolution) && detectorsData[3] >= detectorThresholds[3]) {
-  //     currWidth = detectorsData[1] - detectorsData[3];
-  //     if (currWidth < maxWidth) {
-  //       maxWidth = currWidth;
-  //       width = map(maxWidth, 0, 2 ^ measurementResolution,
-  //                   0, 2*detectorsHorizontalSeparation); // Map the width measurement to the actual width in mm
-  //     }
-  //  }
-  //}
 }
 
 u16 detectors::getLength() {
